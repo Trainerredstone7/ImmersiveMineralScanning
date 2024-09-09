@@ -1,0 +1,16 @@
+[
+{
+  "modid": "immersivemineralscanning",
+  "name": "Immersive Mineral Scanning",
+  "description": "Adds a machine that can perform long-range scanning for Immersive Engineering mineral deposits.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["TrainerRedstone7"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -14,7 +14,7 @@ import trainerredstone7.immersivemineralscanning.proxy.CommonProxy;
 
 import org.apache.logging.log4j.Logger;
 
-//@Mod(modid = ImmersiveMineralScanning.MODID, name = ImmersiveMineralScanning.NAME, version = ImmersiveMineralScanning.VERSION, dependencies = "required-after:immersiveengineering; after:immersivepetroleum")
+@Mod(modid = ImmersiveMineralScanning.MODID, name = ImmersiveMineralScanning.NAME, version = ImmersiveMineralScanning.VERSION, dependencies = "required-after:immersiveengineering; after:immersivepetroleum")
 public class ImmersiveMineralScanning
 {
     public static final String MODID = "immersivemineralscanning";

@@ -124,6 +124,8 @@ public class WideRangeSampleDrillBlock extends Block {
 		this.setHardness(3.0F);
 		this.setResistance(15.0F);
 		lightOpacity = 0;
+		setRegistryName("rangedsampledrill");
+		setUnlocalizedName(ImmersiveMineralScanning.MODID+".rangedsampledrill");
 //TODO change these lines to work again
 //		this.setMetaBlockLayer(BlockTypes_WideRangeSampleDrill.WIDE_RANGE_SAMPLE_DRILL.getMeta(), BlockRenderLayer.CUTOUT);
 //		this.setNotNormalBlock(BlockTypes_WideRangeSampleDrill.WIDE_RANGE_SAMPLE_DRILL.getMeta()); //Might have done what I've needed to in order to get rid of this
@@ -412,6 +414,26 @@ public class WideRangeSampleDrillBlock extends Block {
 		}
 		return super.isToolEffective(type, state);
 	}
+	
+	@Override
+	public int getMetaFromState(IBlockState state){
+		return 0;
+//		if(state==null||!this.equals(state.getBlock()))
+//			return 0;
+//		return state.getValue(this.property).getMeta();
+	}
+	
+	@Override
+	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
+	{
+		return layer == BlockRenderLayer.CUTOUT;
+	}
+	
+//	@Override
+//	public IBlockState getStateFromMeta(int meta)
+//	{
+//		return this.getDefaultState().withProperty(this.property, fromMeta(meta));
+//	}
 	
 	
 //	@Override

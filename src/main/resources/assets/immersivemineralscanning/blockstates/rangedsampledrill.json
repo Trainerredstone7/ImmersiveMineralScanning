@@ -4,7 +4,10 @@
 	{
 		"transform": "forge:default-block",
 		"model": "immersiveengineering:metal_device/core_drill.obj.ie",
-		"custom": {"flip-v": true}
+		"custom": {"flip-v": true},
+		"textures": {
+			"#core_drill": "immersivemineralscanning:blocks/ranged_sample_drill"
+		}
 	},
 	"variants":
 	{

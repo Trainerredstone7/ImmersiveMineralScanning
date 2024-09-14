@@ -20,12 +20,16 @@ import blusunrize.immersiveengineering.common.blocks.BlockIETileProvider;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces;
 import blusunrize.immersiveengineering.common.blocks.ItemBlockIEBase;
 import blusunrize.immersiveengineering.common.blocks.TileEntityIEBase;
+import blusunrize.immersiveengineering.common.blocks.TileEntityMultiblockPart;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IActiveState;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IAdvancedCollisionBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IAdvancedDirectionalTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IAdvancedHasObjProperty;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IAttachedIntegerProperies;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IBlockBounds;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IConfigurableSides;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDirectionalTile;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDualState;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IDynamicTexture;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IFaceShape;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGuiTile;
@@ -33,6 +37,7 @@ import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IHammerIn
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IHasDummyBlocks;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IHasObjProperty;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.ILightValue;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IMirrorAble;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.INeighbourChangeTile;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlacementInteraction;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IPlayerInteraction;
@@ -58,6 +63,7 @@ import blusunrize.immersiveengineering.common.util.Utils;
 import blusunrize.immersiveengineering.common.util.inventory.IEInventoryHandler;
 import blusunrize.immersiveengineering.common.util.inventory.IIEInventory;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -152,6 +158,21 @@ public class WideRangeSampleDrillBlock extends Block {
 //		return new ExtendedBlockState(this, base.getProperties().toArray(new IProperty[0]), unlisted);
 	}
 	
+	/**
+	 * Get the actual Block state of this Block at the given position. This applies properties not visible in the metadata,
+	 * such as fence connections.
+	 */
+	@Override
+	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos)
+	{
+		state = super.getActualState(state, world, pos);
+		TileEntity tile = world.getTileEntity(pos);
+		if(tile instanceof IHasDummyBlocks) {
+			state = state.withProperty(IEProperties.MULTIBLOCKSLAVE, ((IHasDummyBlocks)tile).isDummy());
+		}
+		return state;
+	}
+	
 	@Override
 	public boolean hasTileEntity(IBlockState state) {
 		return true;
@@ -168,6 +189,14 @@ public class WideRangeSampleDrillBlock extends Block {
 		super.getDrops(drops, world, pos, state, fortune);
 	}
 	
+	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		TileEntity tile = world.getTileEntity(pos);
+		if(tile instanceof WideRangeSampleDrillTile) {
+			((WideRangeSampleDrillTile)tile).placeDummies(pos, state);
+		}
+	}
+
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
@@ -214,24 +243,13 @@ public class WideRangeSampleDrillBlock extends Block {
 		{
 			IExtendedBlockState extended = (IExtendedBlockState)state;
 			TileEntity te = world.getTileEntity(pos);
-			if(te!=null)
-			{
+			if(te!=null) {
 				if(te instanceof IHasObjProperty) //this is probably how the animation gets done
 					extended = extended.withProperty(Properties.AnimationProperty, new OBJState(((IHasObjProperty)te).compileDisplayList(), true));
 			}
 			state = extended;
 		}
 		return state;
-	}
-	
-	//TODO can probably refactor this later when going through methods from BlockIEBase
-	public void onIEBlockPlacedBy(World world, BlockPos pos, IBlockState state, EnumFacing side, float hitX, float hitY, float hitZ, EntityLivingBase placer, ItemStack stack)
-	{
-		TileEntity tile = world.getTileEntity(pos);
-		if(tile instanceof IHasDummyBlocks)
-		{
-			((IHasDummyBlocks)tile).placeDummies(pos, state, side, hitX, hitY, hitZ);
-		}
 	}
 	
 	/**

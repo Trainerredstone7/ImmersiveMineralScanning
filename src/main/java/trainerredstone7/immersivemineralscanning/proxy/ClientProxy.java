@@ -23,6 +23,7 @@ public class ClientProxy extends CommonProxy {
 	
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
+    	ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock), 0, new ModelResourceLocation(ImmersiveMineralScanning.wideRangeSampleDrillBlock.getRegistryName(), "inventory"));
     }
     /*
      * TODO figure out everything to get custom IE renderer working for my block
@@ -33,9 +34,4 @@ public class ClientProxy extends CommonProxy {
 		OBJLoader.INSTANCE.addDomain(ImmersiveMineralScanning.MODID);
 		IEOBJLoader.instance.addDomain(ImmersiveMineralScanning.MODID);
     }
-    
-    public void initModel() {
-        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock), 0, new ModelResourceLocation(ImmersiveMineralScanning.wideRangeSampleDrillBlock.getRegistryName(), "inventory"));
-    }
-    
 }

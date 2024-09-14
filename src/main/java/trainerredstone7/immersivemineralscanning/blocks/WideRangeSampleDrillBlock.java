@@ -108,17 +108,8 @@ import trainerredstone7.immersivemineralscanning.blocks.tileentities.WideRangeSa
  */
 
 /*
- * I've added everything from BlockMetalDevice1 that could possibly be necessary.
- * TODO: copy over any important methods from BlockIEBase
- * -have gotten through up to and including createBlockState() so far
- * All important methods from BlockIETileProvider have been copied over and edited appropriately
- * Still need to figure out for sure how block, tile, and model get linked though
- * must be on either the tile or render side
- * The tile doesn't connect to rendering either
- * json provides link to the model (specifically metal_device1_core_drill.json for the sample core drill)
  * 
  * ClientUtils probably useful, particularly getSprite(ResourceLocation)
- * The renderer might be looking at getCustomStateMapping
  * 
  */
 

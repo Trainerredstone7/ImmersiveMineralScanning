@@ -5,6 +5,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
+/**
+ * Tile for the sample drill.
+ * @author TrainerRedstone7
+ * 
+ * TODO: get drill model (animated bit) to render properly
+ */
+
 public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 	public void placeDummies(BlockPos pos, IBlockState state)
 	{

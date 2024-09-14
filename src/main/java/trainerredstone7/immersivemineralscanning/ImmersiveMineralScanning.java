@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import trainerredstone7.immersivemineralscanning.blocks.WideRangeSampleDrillBlock;
+import trainerredstone7.immersivemineralscanning.blocks.tileentities.WideRangeSampleDrillTile;
 import trainerredstone7.immersivemineralscanning.proxy.CommonProxy;
 
 import org.apache.logging.log4j.Logger;
@@ -59,6 +60,7 @@ public class ImmersiveMineralScanning
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
 //    	logger.info("about to register block");
     	event.getRegistry().register(new WideRangeSampleDrillBlock());
+    	GameRegistry.registerTileEntity(WideRangeSampleDrillTile.class, MODID + "_rangedsampledrill");
     }
 
     @SubscribeEvent

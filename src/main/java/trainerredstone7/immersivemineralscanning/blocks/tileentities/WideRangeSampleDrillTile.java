@@ -35,7 +35,7 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 	
 	//Whether the drill is looking for a reservoir vs. a mineral
 	public boolean searchingForReservoir = false;
-	public MineralMix mineralSearchTarget;
+	public MineralMix mineralSearchTarget = ExcavatorHandler.mineralList.keySet().parallelStream().findAny().get();
 	//This should always be a ReservoirType, but cannot define it as such since we're not sure Immersive Petroleum is loaded
 	public Object reservoirSearchTarget;
 	public boolean foundTarget = false;
@@ -57,47 +57,60 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 		final boolean prevActive = active;
 		if(!active&&powered)
 			active = true;
-		else if(active&&!powered&&process >= IEConfig.Machines.coredrill_time)
+		else if(active&&!powered&&foundTarget)
 			active = false;
-
+		if (!world.isRemote) {
+			ImmersiveMineralScanning.logger.info("active = " + active);
+			ImmersiveMineralScanning.logger.info("sample empty? " + sample.isEmpty());
+			ImmersiveMineralScanning.logger.info("energy: " + energyStorage.getEnergyStored());
+		}
 
 		if(active)
-			if(energyStorage.extractEnergy(IEConfig.Machines.coredrill_consumption, false)==IEConfig.Machines.coredrill_consumption)
-			{	
-				DimensionChunkCoords drillChunk = new DimensionChunkCoords(world.provider.getDimension(), getPos().getX() >> 4, getPos().getZ() >> 4);
-				int maxChunks = (2*ConfigGeneral.chunkRadius-1)*(2*ConfigGeneral.chunkRadius-1);
-				for (int i = 0; i < ConfigGeneral.scanrate && process < maxChunks && !foundTarget; i++) {
-					int[] offset = getOffsetFromIndex(process);
-					DimensionChunkCoords chunkToSearch = drillChunk.withOffset(offset[0], offset[1]);
-					if(!searchingForReservoir) {
-						MineralMix mix = fastGetMineralWorldInfo(world, chunkToSearch, false).mineral;
-						if (mix == mineralSearchTarget) {
-							foundTarget = true;
-							targetLocation = chunkToSearch;
+			if(energyStorage.extractEnergy(IEConfig.Machines.coredrill_consumption, false)==IEConfig.Machines.coredrill_consumption) {	
+				ImmersiveMineralScanning.logger.info("has energy");
+				if (!world.isRemote) {
+					DimensionChunkCoords drillChunk = new DimensionChunkCoords(world.provider.getDimension(), getPos().getX() >> 4, getPos().getZ() >> 4);
+					int maxChunks = (2 * ConfigGeneral.chunkRadius - 1) * (2 * ConfigGeneral.chunkRadius - 1);
+//					ImmersiveMineralScanning.logger.info("scanrate:" + ConfigGeneral.scanrate);
+					ImmersiveMineralScanning.logger.info("progress: " + process + "/" + maxChunks);
+					for (int i = 0; i < ConfigGeneral.scanrate && process < maxChunks && !foundTarget; i++) {
+						int[] offset = getOffsetFromIndex(process);
+						DimensionChunkCoords chunkToSearch = drillChunk.withOffset(offset[0], offset[1]);
+						if (!searchingForReservoir) {
+							MineralMix mix = fastGetMineralWorldInfo(world, chunkToSearch, false).mineral;
+							if (mix == mineralSearchTarget) {
+								foundTarget = true;
+								targetLocation = chunkToSearch;
+							}
+						} else if (ImmersiveMineralScanning.immersivePetroleumPresent) {
+							ReservoirType type = fastGetOilWorldInfo(world, chunkToSearch).type;
+							if (reservoirSearchTarget instanceof ReservoirType && (ReservoirType) reservoirSearchTarget == type) {
+								foundTarget = true;
+								targetLocation = chunkToSearch;
+							}
 						}
+						ImmersiveMineralScanning.logger.info(chunkToSearch.toString() + ": " + foundTarget);
+						process++;
 					}
-					else if (ImmersiveMineralScanning.immersivePetroleumPresent) {
-						ReservoirType type = fastGetOilWorldInfo(world, chunkToSearch).type;
-						if (reservoirSearchTarget instanceof ReservoirType && (ReservoirType) reservoirSearchTarget == type) {
-							foundTarget = true;
-							targetLocation = chunkToSearch;
-						}
+					if (foundTarget) {
+						MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, targetLocation.x, targetLocation.z);
+						this.sample = createCoreSample(world, targetLocation.x, targetLocation.z, info);
+						//might not need these here
+						active = false;
+						process = 0;
 					}
-					process++;
+					if (process >= maxChunks) {
+						active = false;
+						process = 0;
+					}
 				}
-				
-				if (foundTarget = true) {
-					//TODO probably should do stuff here
-				}
-				
-				
-				if(process >= IEConfig.Machines.coredrill_time)
-				{
-					int cx = getPos().getX() >> 4;
-					int cz = getPos().getZ() >> 4;
-					MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, cx, cz);
-					this.sample = createCoreSample(world, (getPos().getX() >> 4), (getPos().getZ() >> 4), info);
-				}
+//				if(process >= IEConfig.Machines.coredrill_time)
+//				{
+//					int cx = getPos().getX() >> 4;
+//					int cz = getPos().getZ() >> 4;
+//					MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, cx, cz);
+//					this.sample = createCoreSample(world, (getPos().getX() >> 4), (getPos().getZ() >> 4), info);
+//				}
 				this.markDirty();
 				this.markContainingBlockForUpdate(null);
 			}
@@ -110,6 +123,7 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 	
 	public void placeDummies(BlockPos pos, IBlockState state)
 	{
+		ImmersiveMineralScanning.logger.info(mineralSearchTarget.name);
 		for(int i = 1; i <= 2; i++)
 		{
 			world.setBlockState(pos.add(0, i, 0), state);
@@ -234,7 +248,8 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 	 * @param n The index of the location in the spiral.
 	 * @return an (x,y) pair indicating offset
 	 */
-	private int[] getOffsetFromIndex(int n) {		
+	private int[] getOffsetFromIndex(int n) {
+		n += 1; //this formula starts on an index of 1, but want to call it using an index that starts on 0
 		int k = (int) Math.ceil((Math.sqrt(n)-1)/2);
 		int t = 2*k;
 		int m = (t+1)*(t+1);

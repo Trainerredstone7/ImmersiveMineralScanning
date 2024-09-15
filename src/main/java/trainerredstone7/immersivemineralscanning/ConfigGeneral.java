@@ -12,16 +12,20 @@ import net.minecraftforge.common.config.Configuration;
 
 @Config(modid = "immersivemineralscanning", category = "general")
 public class ConfigGeneral {
-	@Ignore
-	private static final int MIN_CHUNK_RADIUS = 1;
-	@Ignore
-	private static final int MAX_CHUNK_RADIUS = Integer.MAX_VALUE;
-	@Ignore
-	private static final int DEFAULT_CHUNK_RADIUS = 60;
+//	@Ignore
+//	private static final int MIN_CHUNK_RADIUS = 1;
+//	@Ignore
+//	private static final int MAX_CHUNK_RADIUS = Integer.MAX_VALUE;
+//	@Ignore
+//	private static final int DEFAULT_CHUNK_RADIUS = 60;
 	
-	@RangeInt(min = MIN_CHUNK_RADIUS, max = MAX_CHUNK_RADIUS)
+	@RangeInt(min = 1, max = Integer.MAX_VALUE)
 	@LangKey(value = "immersivemineralscanning.config.scanradius")
 	public static int chunkRadius = 60;
+	
+	@RangeInt(min = 1, max = Integer.MAX_VALUE)
+	@LangKey(value = "immersivemineralscanning.config.scanrate")
+	public static int scanrate = 10;
 
 //	public static void readConfig(Configuration config) {
 //		ImmersiveMineralScanning.logger.info("reading config");

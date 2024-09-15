@@ -4,3 +4,5 @@ itemGroup.immersivemineralscanning=Immersive Mineral Scanning
 #Config
 immersivemineralscanning.config.scanradius=Scan Radius
 immersivemineralscanning.config.scanradius.tooltip=The radius (in chunks) in which the Ranged Core Sample Drill will search for a mineral deposit.
+immersivemineralscanning.config.scanrate=Scan Rate
+immersivemineralscanning.config.scanrate.tooltip=The number of chunks the Ranged Core Sample Drill will check per tick. Very large numbers could cause lag.

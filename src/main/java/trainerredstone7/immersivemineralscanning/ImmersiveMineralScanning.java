@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -38,7 +39,7 @@ public class ImmersiveMineralScanning
     @GameRegistry.ObjectHolder(ImmersiveMineralScanning.MODID+":rangedsampledrill")
     public static WideRangeSampleDrillBlock wideRangeSampleDrillBlock;
     public static final CreativeTabs creativeTab = new ImmersiveMineralScanningTab();
-//    public static Configuration config;
+    public static boolean immersivePetroleumPresent = false;
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -60,6 +61,8 @@ public class ImmersiveMineralScanning
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
+        if (Loader.isModLoaded("immersivepetroleum"))
+			immersivePetroleumPresent = true;
 //        if (config.hasChanged()) {
 //            config.save();
 //        }

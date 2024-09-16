@@ -4,8 +4,11 @@ import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -81,5 +84,10 @@ public class ImmersiveMineralScanning
 //    	logger.info("registered item");
     }
     
-    
+    @SubscribeEvent
+    public static void syncConfig(ConfigChangedEvent.OnConfigChangedEvent event) {
+    	if (event.getModID().equals(MODID)) {
+    		ConfigManager.sync(MODID, Config.Type.INSTANCE);
+    	}
+    }
 }

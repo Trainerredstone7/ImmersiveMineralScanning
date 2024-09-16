@@ -54,20 +54,27 @@ public class WideRangeSampleDrillRender extends TileEntitySpecialRenderer<WideRa
 			GlStateManager.shadeModel(7424);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x+.5, y+.5, z+.5);
+		
+		if(tile.drillExtension != 0 || tile.drillRotation%4 != 0) {
+			GlStateManager.rotate(((tile.drillRotation+partialTicks)*22.5f)%360f, 0, 1, 0);
+		}
+		if (tile.drillExtension != 0) {
+			GlStateManager.translate(0, -1.4*tile.drillExtension/100.0, 0);
+		}
 
 		//		float rot = 360*tile.rotation-(!tile.canTurn||tile.rotation==0||tile.rotation-tile.prevRotation<4?0:tile.facing.getAxis()==Axis.X?-f:f);
 		//		GlStateManager.rotate(rot, 0,0,1);
 
-		int max = IEConfig.Machines.coredrill_time;
-		if(tile.process > 0&&tile.process < max)
-		{
-			GlStateManager.rotate(((tile.process+partialTicks)*22.5f)%360f, 0, 1, 0);
-			float push = tile.process/(float)max;
-			if(tile.process > max/2)
-				push = 1-push;
-			GlStateManager.translate(0, -2.8f*push, 0);
-		}
-
+//		int max = IEConfig.Machines.coredrill_time;		
+//		if(tile.process > 0&&tile.process < max)
+//		{
+//			GlStateManager.rotate(((tile.process+partialTicks)*22.5f)%360f, 0, 1, 0);
+//			float push = tile.process/(float)max;
+//			if(tile.process > max/2)
+//				push = 1-push;
+//			GlStateManager.translate(0, -2.8f*push, 0);
+//		}
+		
 		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 		worldRenderer.setTranslation(-.5-blockPos.getX(), -.5-blockPos.getY(), -.5-blockPos.getZ());
 		worldRenderer.color(255, 255, 255, 255);

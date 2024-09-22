@@ -2,6 +2,7 @@ package trainerredstone7.immersivemineralscanning.blocks.tileentities;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -12,6 +13,7 @@ import blusunrize.immersiveengineering.api.tool.ExcavatorHandler.MineralMix;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler.MineralSelection;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler.MineralWorldInfo;
 import blusunrize.immersiveengineering.common.Config.IEConfig;
+import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGuiTile;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntitySampleDrill;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.OilWorldInfo;
@@ -27,9 +29,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fml.common.Optional;
-import scala.actors.threadpool.Arrays;
 import trainerredstone7.immersivemineralscanning.ConfigGeneral;
 import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
 
@@ -37,21 +36,31 @@ import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
  * Tile for the sample drill.
  * @author TrainerRedstone7
  * 
+ * TODO: Add gui on sneak-click that allows for mineral/reservoir selection
+ * Using a scrollable menu would probably work (does not need to be dropdown - just scroll and select)
  */
 
-public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
+public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGuiTile {
 	
 	//Whether the drill is looking for a reservoir vs. a mineral
 	public boolean searchingForReservoir = false;
-	public MineralMix mineralSearchTarget = ExcavatorHandler.mineralList.keySet().parallelStream().findAny().get();
+	public String searchTarget;
 	//This should always be a ReservoirType, but cannot define it as such since we're not sure Immersive Petroleum is loaded
-	public Object reservoirSearchTarget;
+//	public Object reservoirSearchTarget;
 	public int chunkProgress = 0;
 	//0 is fully retracted, 100 is fully extended
 	public int drillExtension = 0;
 	public boolean isDrillExtending = false;
 	//Unit is 1/16 of a rotation
 	public byte drillRotation = 0;
+	
+	public RangedSampleDrillTile(World world) {
+		searchTarget = ExcavatorHandler.mineralList.keySet().stream()
+				.filter(p -> p.validDimension(world.provider.getDimension()))
+				.map(m -> m.name)
+				.sorted(String.CASE_INSENSITIVE_ORDER)
+				.findFirst().orElseGet(() -> "");
+	}
 	
 	@Override
 	public void update()
@@ -78,31 +87,31 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 
 		if(active)
 			if(energyStorage.extractEnergy(IEConfig.Machines.coredrill_consumption, false)==IEConfig.Machines.coredrill_consumption) {	
-//				ImmersiveMineralScanning.logger.info("has energy");
 				if (!world.isRemote) {
 					DimensionChunkCoords drillChunk = new DimensionChunkCoords(world.provider.getDimension(), getPos().getX() >> 4, getPos().getZ() >> 4);
 					int maxChunks = (2 * ConfigGeneral.chunkRadius - 1) * (2 * ConfigGeneral.chunkRadius - 1);
-//					ImmersiveMineralScanning.logger.info("scanrate:" + ConfigGeneral.scanrate);
 					ImmersiveMineralScanning.logger.info("progress: " + chunkProgress + "/" + maxChunks);
 					boolean foundTarget = false;
 					DimensionChunkCoords targetLocation = drillChunk;
 					for (int i = 0; i < ConfigGeneral.scanrate && chunkProgress < maxChunks && !foundTarget; i++) {
 						int[] offset = getOffsetFromIndex(chunkProgress);
 						DimensionChunkCoords chunkToSearch = drillChunk.withOffset(offset[0], offset[1]);
+						String resource = null;
 						if (!searchingForReservoir) {
 							MineralMix mix = fastGetMineralWorldInfo(world, chunkToSearch, false).mineral;
-//							ImmersiveMineralScanning.logger.info("is mix null? " + (mix == null));
-//							ImmersiveMineralScanning.logger.info("is mix name null? " + (mix.name == null));
-							if (mix != null && mineralSearchTarget != null && mix.name.equals(mineralSearchTarget.name)) {
-								foundTarget = true;
-								targetLocation = chunkToSearch;
+							if (mix != null) {
+								resource = mix.name;
 							}
-						} else if (ImmersiveMineralScanning.immersivePetroleumPresent) {
+						}
+						else if (ImmersiveMineralScanning.immersivePetroleumPresent) {
 							ReservoirType type = fastGetOilWorldInfo(world, chunkToSearch).type;
-							if (type != null && reservoirSearchTarget instanceof ReservoirType && ((ReservoirType) reservoirSearchTarget).name.equals(type.name)) {
-								foundTarget = true;
-								targetLocation = chunkToSearch;
+							if (type != null) {
+								resource = type.name;
 							}
+						}
+						if (resource != null && resource.equals(searchTarget)) {
+							foundTarget = true;
+							targetLocation = chunkToSearch;
 						}
 						ImmersiveMineralScanning.logger.info(chunkToSearch.toString() + ": " + foundTarget);
 						chunkProgress++;
@@ -113,7 +122,6 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 						active = false;
 						chunkProgress = 0;
 					}
-					//TODO maybe have some way to indicate to the player that the search didn't find the resource
 					if (chunkProgress >= maxChunks) {
 						active = false;
 //						chunkProgress = 0;
@@ -170,8 +178,8 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 	public boolean interact(EnumFacing side, EntityPlayer player, EnumHand hand, ItemStack heldItem, float hitX, float hitY, float hitZ) {
 		if(dummy!=0) {
 			TileEntity te = world.getTileEntity(getPos().add(0, -dummy, 0));
-			if(te instanceof WideRangeSampleDrillTile)
-				return ((WideRangeSampleDrillTile)te).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
+			if(te instanceof RangedSampleDrillTile)
+				return ((RangedSampleDrillTile)te).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
 		}
 		if (drillExtension == 0) {
 			if (!this.sample.isEmpty()) {
@@ -206,7 +214,7 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 	
 	public void placeDummies(BlockPos pos, IBlockState state)
 	{
-		ImmersiveMineralScanning.logger.info(mineralSearchTarget.name);
+		ImmersiveMineralScanning.logger.info(searchTarget);
 		for(int i = 1; i <= 2; i++)
 		{
 			world.setBlockState(pos.add(0, i, 0), state);
@@ -223,14 +231,15 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 		nbt.setInteger("drillExtension", drillExtension);
 		nbt.setInteger("drillRotation", drillRotation);
 		nbt.setBoolean("isDrillExtending", isDrillExtending);
-		if (mineralSearchTarget != null) {
-			NBTTagCompound mineralSearchTargetNBT = mineralSearchTarget.writeToNBT();
-			nbt.setTag("mineralSearchTarget", mineralSearchTargetNBT);
+		if (searchTarget != null) {
+			nbt.setString("searchTarget", searchTarget);
+//			NBTTagCompound mineralSearchTargetNBT = mineralSearchTarget.writeToNBT();
+//			nbt.setTag("mineralSearchTarget", mineralSearchTargetNBT);
 		}
-		if (ImmersiveMineralScanning.immersivePetroleumPresent && reservoirSearchTarget instanceof ReservoirType) {
-			NBTTagCompound reservoirSearchTargetNBT = ((ReservoirType) reservoirSearchTarget).writeToNBT();
-			nbt.setTag("reservoirSearchTarget", reservoirSearchTargetNBT);
-		}
+//		if (ImmersiveMineralScanning.immersivePetroleumPresent && reservoirSearchTarget instanceof ReservoirType) {
+//			NBTTagCompound reservoirSearchTargetNBT = ((ReservoirType) reservoirSearchTarget).writeToNBT();
+//			nbt.setTag("reservoirSearchTarget", reservoirSearchTargetNBT);
+//		}
 	}
 
 	@Override
@@ -242,12 +251,13 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 		drillExtension = nbt.getInteger("drillExtension");
 		isDrillExtending = nbt.getBoolean("isDrillExtending");
 		drillRotation = nbt.getByte("drillRotation");
-		if (nbt.hasKey("mineralSearchTarget", NBT.TAG_COMPOUND)) {
-			mineralSearchTarget = MineralMix.readFromNBT(nbt.getCompoundTag("mineralSearchTarget"));
-		}
-		if (ImmersiveMineralScanning.immersivePetroleumPresent && nbt.hasKey("reservoirSearchTarget", NBT.TAG_COMPOUND)) {
-			reservoirSearchTarget = ReservoirType.readFromNBT(nbt.getCompoundTag("reservoirSearchTarget"));
-		}
+		searchTarget = nbt.getString("searchTarget");
+//		if (nbt.hasKey("mineralSearchTarget", NBT.TAG_COMPOUND)) {
+//			searchTarget = MineralMix.readFromNBT(nbt.getCompoundTag("searchTarget")).name;
+//		}
+//		if (ImmersiveMineralScanning.immersivePetroleumPresent && nbt.hasKey("reservoirSearchTarget", NBT.TAG_COMPOUND)) {
+//			reservoirSearchTarget = ReservoirType.readFromNBT(nbt.getCompoundTag("reservoirSearchTarget"));
+//		}
 	}
 	
 	
@@ -397,5 +407,24 @@ public class WideRangeSampleDrillTile extends TileEntitySampleDrill {
 //		int y = (int) Math.pow(-1, m)*((n-m*(m+1))*(((int) Math.floor(2*Math.sqrt(n)))%2)-(int) Math.ceil(m/2.0));
 //		return new int[] {x,y};
 		
+	}
+
+	@Override
+	public boolean canOpenGui() {
+		return true;
+	}
+
+	@Override
+	public int getGuiID() {
+		return 0;
+	}
+
+	@Override
+	public TileEntity getGuiMaster() {
+		if (dummy != 0) {
+			TileEntity tile = world.getTileEntity(getPos().add(0, -dummy, 0));
+			return (tile instanceof RangedSampleDrillTile)?tile:null;
+		}
+		else return this;
 	}
 }

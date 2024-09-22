@@ -23,11 +23,11 @@ import net.minecraftforge.client.model.obj.OBJModel.OBJState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.Properties;
 import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
-import trainerredstone7.immersivemineralscanning.blocks.tileentities.WideRangeSampleDrillTile;
+import trainerredstone7.immersivemineralscanning.blocks.tileentities.RangedSampleDrillTile;
 
-public class WideRangeSampleDrillRender extends TileEntitySpecialRenderer<WideRangeSampleDrillTile> {
+public class RangedSampleDrillRender extends TileEntitySpecialRenderer<RangedSampleDrillTile> {
 	@Override
-	public void render(WideRangeSampleDrillTile tile, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
+	public void render(RangedSampleDrillTile tile, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
 	{
 		if(tile.isDummy()||!tile.getWorld().isBlockLoaded(tile.getPos(), false))
 			return;

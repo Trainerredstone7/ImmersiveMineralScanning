@@ -17,14 +17,26 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import trainerredstone7.immersivemineralscanning.blocks.WideRangeSampleDrillBlock;
-import trainerredstone7.immersivemineralscanning.blocks.tileentities.WideRangeSampleDrillTile;
+import net.minecraftforge.fml.relauncher.Side;
+import trainerredstone7.immersivemineralscanning.blocks.RangedSampleDrillBlock;
+import trainerredstone7.immersivemineralscanning.blocks.tileentities.RangedSampleDrillTile;
+import trainerredstone7.immersivemineralscanning.network.SearchTargetUpdatePacket;
 import trainerredstone7.immersivemineralscanning.proxy.CommonProxy;
+import net.minecraftforge.fml.common.Optional;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
+
+import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
+import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
+import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.ReservoirType;
 
 @Mod(modid = ImmersiveMineralScanning.MODID, name = ImmersiveMineralScanning.NAME, version = ImmersiveMineralScanning.VERSION, dependencies = "required-after:forge@[14.23.1.2602,); required-after:immersiveengineering; after:immersivepetroleum")
 @Mod.EventBusSubscriber
@@ -40,9 +52,12 @@ public class ImmersiveMineralScanning
     @Mod.Instance
     public static ImmersiveMineralScanning instance;
     @GameRegistry.ObjectHolder(ImmersiveMineralScanning.MODID+":rangedsampledrill")
-    public static WideRangeSampleDrillBlock wideRangeSampleDrillBlock;
+    public static RangedSampleDrillBlock wideRangeSampleDrillBlock;
     public static final CreativeTabs creativeTab = new ImmersiveMineralScanningTab();
+    public static final SimpleNetworkWrapper PACKET_HANDLER = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
     public static boolean immersivePetroleumPresent = false;
+    //true if it's a reservoir, false if it's a mineral
+    public Map<String, Boolean> resourceTypeMap;
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -59,23 +74,35 @@ public class ImmersiveMineralScanning
     public void init(FMLInitializationEvent event)
     {
         proxy.init(event);
+        PACKET_HANDLER.registerMessage(SearchTargetUpdatePacket.ServerHandler.class, SearchTargetUpdatePacket.class, 0, Side.SERVER);
     }
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
-        if (Loader.isModLoaded("immersivepetroleum"))
+        resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream().collect(Collectors.toMap(m -> m.name, m -> false));
+        if (Loader.isModLoaded("immersivepetroleum")) {
 			immersivePetroleumPresent = true;
-//        if (config.hasChanged()) {
+			//can't use lambda or Java freaks out about ResourceType; need to stuff it in an Optional method instead
+			PumpjackHandler.reservoirList.keySet().stream().forEach(this::addToResourceTypeMap);
+        }
+        
+        //        if (config.hasChanged()) {
 //            config.save();
 //        }
     }
     
-    @SubscribeEvent
+    @Optional.Method(modid = "immersivepetroleum")
+    private void addToResourceTypeMap(ReservoirType r) {
+    	resourceTypeMap.putIfAbsent(r.name, true);
+    }
+    
+    @SuppressWarnings("deprecation")
+	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
 //    	logger.info("about to register block");
-    	event.getRegistry().register(new WideRangeSampleDrillBlock());
-    	GameRegistry.registerTileEntity(WideRangeSampleDrillTile.class, MODID + "_rangedsampledrill");
+    	event.getRegistry().register(new RangedSampleDrillBlock());
+    	GameRegistry.registerTileEntity(RangedSampleDrillTile.class, MODID + "_rangedsampledrill");
     }
 
     @SubscribeEvent
@@ -90,4 +117,18 @@ public class ImmersiveMineralScanning
     		ConfigManager.sync(MODID, Config.Type.INSTANCE);
     	}
     }
+    
+//	/**
+//	 * Needs optional annotation so generic reference to ReservoirType doesn't blow up startup
+//	 */
+//  @Optional.Method(modid = "immersivepetroleum")
+//	private void putReservoirTypesInResourceTypeMap() {
+//		PumpjackHandler.reservoirList.keySet().stream().forEach(this::addToResourceTypeMap);
+//	}
+
+
+//    @Optional.Method(modid = "immersivepetroleum")
+//    public void putReservoirTypesInResourceTypeMap() {
+//    	
+//    }
 }

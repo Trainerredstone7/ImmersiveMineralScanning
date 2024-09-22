@@ -99,7 +99,7 @@ import net.minecraftforge.common.property.Properties;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
-import trainerredstone7.immersivemineralscanning.blocks.tileentities.WideRangeSampleDrillTile;
+import trainerredstone7.immersivemineralscanning.blocks.tileentities.RangedSampleDrillTile;
 
 /**
  * 
@@ -113,9 +113,9 @@ import trainerredstone7.immersivemineralscanning.blocks.tileentities.WideRangeSa
  * 
  */
 
-public class WideRangeSampleDrillBlock extends Block {
+public class RangedSampleDrillBlock extends Block {
 	
-	public WideRangeSampleDrillBlock() {
+	public RangedSampleDrillBlock() {
 		super(Material.IRON);
 //		super("metal_device1", Material.IRON, PropertyEnum.create("type", BlockTypes_WideRangeSampleDrill.class), ItemBlockIEBase.class, IEProperties.FACING_ALL, IEProperties.MULTIBLOCKSLAVE, IEProperties.BOOLEANS[0], Properties.AnimationProperty, IOBJModelCallback.PROPERTY, IEProperties.OBJ_TEXTURE_REMAP);
 		this.setHardness(3.0F);
@@ -123,10 +123,6 @@ public class WideRangeSampleDrillBlock extends Block {
 		lightOpacity = 0;
 		setRegistryName("rangedsampledrill");
 		setUnlocalizedName(ImmersiveMineralScanning.MODID+".rangedsampledrill");
-//TODO change these lines to work again
-//		this.setMetaBlockLayer(BlockTypes_WideRangeSampleDrill.WIDE_RANGE_SAMPLE_DRILL.getMeta(), BlockRenderLayer.CUTOUT);
-//		this.setNotNormalBlock(BlockTypes_WideRangeSampleDrill.WIDE_RANGE_SAMPLE_DRILL.getMeta()); //Might have done what I've needed to in order to get rid of this
-//		this.setMetaMobilityFlag(BlockTypes_WideRangeSampleDrill.WIDE_RANGE_SAMPLE_DRILL.getMeta(), EnumPushReaction.BLOCK);
 	}
 	
 	@Override
@@ -171,7 +167,7 @@ public class WideRangeSampleDrillBlock extends Block {
 	
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		return new WideRangeSampleDrillTile();
+		return new RangedSampleDrillTile(world);
 	}
 	
 	@Override
@@ -183,8 +179,8 @@ public class WideRangeSampleDrillBlock extends Block {
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		TileEntity tile = world.getTileEntity(pos);
-		if(tile instanceof WideRangeSampleDrillTile) {
-			((WideRangeSampleDrillTile)tile).placeDummies(pos, state);
+		if(tile instanceof RangedSampleDrillTile) {
+			((RangedSampleDrillTile)tile).placeDummies(pos, state);
 		}
 	}
 
@@ -192,8 +188,8 @@ public class WideRangeSampleDrillBlock extends Block {
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
 		TileEntity tile = world.getTileEntity(pos);
-		if(tile instanceof WideRangeSampleDrillTile)
-			((WideRangeSampleDrillTile)tile).breakDummies(pos, state);
+		if(tile instanceof RangedSampleDrillTile)
+			((RangedSampleDrillTile)tile).breakDummies(pos, state);
 		super.breakBlock(world, pos, state);
 		world.removeTileEntity(pos);
 	}
@@ -251,21 +247,18 @@ public class WideRangeSampleDrillBlock extends Block {
 	{
 		ItemStack heldItem = player.getHeldItem(hand);
 		TileEntity tile = world.getTileEntity(pos);
-		if(tile instanceof IPlayerInteraction)
+		if(tile instanceof RangedSampleDrillTile)
 		{
-			boolean b = ((IPlayerInteraction)tile).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
-			if(b)
+			if (player.isSneaking()) {
+				ImmersiveMineralScanning.proxy.openRangedSampleDrillGui((RangedSampleDrillTile) tile);
+				return true;
+			}
+			else {
+				boolean b = ((RangedSampleDrillTile)tile).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
 				return b;
+			}
 		}
-//Might make this tile have a gui; in this case probably want to use this instead and implement IGuiTile on the tile
-//		if(tile instanceof IGuiTile&&hand==EnumHand.MAIN_HAND&&!player.isSneaking())
-//		{
-//			TileEntity master = ((IGuiTile)tile).getGuiMaster();
-//			if(!world.isRemote&&master!=null&&((IGuiTile)master).canOpenGui(player))
-//				CommonProxy.openGuiForTile(player, (TileEntity & IGuiTile)master);
-//			return true;
-//		}
-		return false;
+		else return false;
 	}
 
 	@Override

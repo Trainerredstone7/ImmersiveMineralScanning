@@ -65,7 +65,7 @@ dependencies {
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     
     deobfCompile "blusunrize:ImmersiveEngineering:0.12-+"
-	deobfProvided "curse.maven:immersivepetroleum-268250:3382321"
+	deobfCompile "curse.maven:immersivepetroleum-268250:3382321"
 
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

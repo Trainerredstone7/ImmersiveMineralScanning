@@ -9,5 +9,15 @@ immersivemineralscanning.config.scanradius=Scan Radius
 immersivemineralscanning.config.scanradius.tooltip=The radius (in chunks) in which the Ranged Core Sample Drill will search for a mineral deposit.
 immersivemineralscanning.config.scanrate=Scan Rate
 immersivemineralscanning.config.scanrate.tooltip=The number of chunks the Ranged Core Sample Drill will check per tick. Very large numbers could cause lag.
-immersivemineralscanning.messages.nomineralfound=The specified mineral or reservoir was not found within the scan range!
-immersivemineralscanning.messages.nomineralselected=Select a mineral or reservoir to search for first!
+immersivemineralscanning.messages.nomineralfound=No %1$s %2$s was found within the scan range!
+#immersivemineralscanning.messages.nomineralfound=The specified mineral %1$swas not found within the scan range!
+immersivemineralscanning.messages.nomineralselected=Select a mineral %1$sto search for first!
+immersivemineralscanning.messages.reservoirincluded=or reservoir 
+immersivemineralscanning.messages.vein=vein
+immersivemineralscanning.messages.reservoir=reservoir
+
+#Manual
+ie.manual.entry.rangedsampledrill.name=Ranged Core Sample Drill
+ie.manual.entry.rangedsampledrill.subtext=Search near and far
+ie.manual.entry.rangedsampledrill0=Finding rare mineral veins by checking individual chunks with the Core Sample Drill can be pretty slow. The Ranged Core Sample Drill speeds this process up by scanning a <config;i;rangedsampledrill_chunkRadius>-chunk radius for the desired vein.
+ie.manual.entry.rangedsampledrill1=Operation of this machine is very similar to the Core Sample Drill - before use, just interact with the Ranged Core Sample Drill while sneaking to select the vein to search for. Like the normal drill, the Ranged Core Sample Drill uses <config;i;coredrill_consumption> Flux/t.

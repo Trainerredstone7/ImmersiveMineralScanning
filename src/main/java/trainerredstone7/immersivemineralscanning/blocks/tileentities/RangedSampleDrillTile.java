@@ -15,6 +15,7 @@ import blusunrize.immersiveengineering.api.tool.ExcavatorHandler.MineralWorldInf
 import blusunrize.immersiveengineering.common.Config.IEConfig;
 import blusunrize.immersiveengineering.common.blocks.IEBlockInterfaces.IGuiTile;
 import blusunrize.immersiveengineering.common.blocks.metal.TileEntitySampleDrill;
+import blusunrize.immersiveengineering.common.util.ItemNBTHelper;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.OilWorldInfo;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.ReservoirType;
@@ -26,6 +27,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -121,6 +125,17 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 					if (foundTarget) {
 						MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, targetLocation.x, targetLocation.z);
 						this.sample = createCoreSample(world, targetLocation.x, targetLocation.z, info);
+						//Add reservoir info manually since IP's handler won't catch it
+						if (ImmersiveMineralScanning.immersivePetroleumPresent) {
+							OilWorldInfo reservoirInfo = PumpjackHandler.getOilWorldInfo(world, targetLocation.x, targetLocation.z);
+							if (reservoirInfo.getType() != null) {
+								ItemNBTHelper.setString(sample, "resType", reservoirInfo.getType().name);
+								ItemNBTHelper.setInt(sample, "oil", reservoirInfo.current);
+							}
+							else {
+								ItemNBTHelper.setInt(sample, "oil", 0);
+							}
+						}
 						active = false;
 						chunkProgress = 0;
 					}
@@ -204,14 +219,22 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 					* (2 * ConfigGeneral.chunkRadius - 1)) {
 				//tell player that the resource wasn't found
 				if (!world.isRemote) {
-					player.sendMessage(new TextComponentTranslation("immersivemineralscanning.messages.nomineralfound"));
+					TextComponentString resource = new TextComponentString(searchTarget.toLowerCase());
+					TextComponentTranslation resourceType = 
+							ImmersiveMineralScanning.instance.resourceTypeMap.getOrDefault(searchTarget, false)?
+									new TextComponentTranslation("immersivemineralscanning.messages.reservoir")
+									:new TextComponentTranslation("immersivemineralscanning.messages.vein");
+					player.sendMessage(new TextComponentTranslation(("immersivemineralscanning.messages.nomineralfound"), resource, resourceType));
+//					ITextComponent messageComponent = ImmersiveMineralScanning.immersivePetroleumPresent?new TextComponentTranslation("immersivemineralscanning.messages.reservoirincluded"):new TextComponentString("");
+//					player.sendMessage(new TextComponentTranslation(("immersivemineralscanning.messages.nomineralfound"), messageComponent));
 				}
 				chunkProgress = 0;
 				return true;
 			}
 			else if (searchTarget == "") {
 				if (!world.isRemote) {
-					player.sendMessage(new TextComponentTranslation("immersivemineralscanning.messages.nomineralselected"));
+					ITextComponent messageComponent = ImmersiveMineralScanning.immersivePetroleumPresent?new TextComponentTranslation("immersivemineralscanning.messages.reservoirincluded"):new TextComponentString("");
+					player.sendMessage(new TextComponentTranslation("immersivemineralscanning.messages.nomineralselected", messageComponent));
 				}
 				return true;
 			}

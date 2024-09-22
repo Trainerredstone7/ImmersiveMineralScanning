@@ -1,17 +1,28 @@
 package trainerredstone7.immersivemineralscanning;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.Logger;
+
+import blusunrize.immersiveengineering.api.ManualHelper;
+import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
+import blusunrize.lib.manual.ManualPages;
+import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
+import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.ReservoirType;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -25,19 +36,11 @@ import trainerredstone7.immersivemineralscanning.blocks.RangedSampleDrillBlock;
 import trainerredstone7.immersivemineralscanning.blocks.tileentities.RangedSampleDrillTile;
 import trainerredstone7.immersivemineralscanning.network.SearchTargetUpdatePacket;
 import trainerredstone7.immersivemineralscanning.proxy.CommonProxy;
-import net.minecraftforge.fml.common.Optional;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.Logger;
-
-import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
-import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
-import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.ReservoirType;
-
+/**
+ * @author trainerredstone7
+ *
+ */
 @Mod(modid = ImmersiveMineralScanning.MODID, name = ImmersiveMineralScanning.NAME, version = ImmersiveMineralScanning.VERSION, dependencies = "required-after:forge@[14.23.1.2602,); required-after:immersiveengineering; after:immersivepetroleum")
 @Mod.EventBusSubscriber
 public class ImmersiveMineralScanning
@@ -75,6 +78,7 @@ public class ImmersiveMineralScanning
     {
         proxy.init(event);
         PACKET_HANDLER.registerMessage(SearchTargetUpdatePacket.ServerHandler.class, SearchTargetUpdatePacket.class, 0, Side.SERVER);
+        blusunrize.immersiveengineering.common.Config.manual_int.put("rangedsampledrill_chunkRadius", ConfigGeneral.chunkRadius);
     }
     
     @EventHandler
@@ -86,10 +90,11 @@ public class ImmersiveMineralScanning
 			//can't use lambda or Java freaks out about ReservoirType; need to stuff it in an Optional method instead
 			PumpjackHandler.reservoirList.keySet().stream().forEach(this::addToResourceTypeMap);
         }
-        
-        //        if (config.hasChanged()) {
-//            config.save();
-//        }
+        ManualPages.Crafting manualPage0 = new ManualPages.Crafting(ManualHelper.getManual(), "rangedsampledrill0", new ItemStack(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock)));
+        ManualPages.Text manualPage1 = new ManualPages.Text(ManualHelper.getManual(), "rangedsampledrill1");
+        ManualHelper.addEntry("Ranged Core Sample Drill", ManualHelper.CAT_GENERAL, manualPage0, manualPage1);
+//TODO add manual page
+//        ManualHelper.addEntry(String name, String category, IManualPage... pages);
     }
     
     @Optional.Method(modid = "immersivepetroleum")

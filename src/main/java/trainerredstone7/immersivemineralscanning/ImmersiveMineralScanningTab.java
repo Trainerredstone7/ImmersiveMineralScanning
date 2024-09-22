@@ -1,6 +1,8 @@
 package trainerredstone7.immersivemineralscanning;
 
+import blusunrize.immersiveengineering.common.IEContent;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
@@ -15,7 +17,13 @@ public class ImmersiveMineralScanningTab extends CreativeTabs {
 	@SideOnly(Side.CLIENT)
 	@Override
 	public ItemStack getTabIconItem() {
-		return new ItemStack(new ItemBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock));
+		return ItemStack.EMPTY;
+	}
+	
+	@Override
+	public ItemStack getIconItemStack()
+	{
+		return new ItemStack(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock));
 	}
 
 }

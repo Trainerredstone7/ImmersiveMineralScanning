@@ -123,6 +123,7 @@ public class RangedSampleDrillBlock extends Block {
 		lightOpacity = 0;
 		setRegistryName("rangedsampledrill");
 		setUnlocalizedName(ImmersiveMineralScanning.MODID+".rangedsampledrill");
+		setCreativeTab(ImmersiveMineralScanning.CREATIVE_TAB);
 	}
 	
 	@Override

@@ -53,7 +53,7 @@ public class ImmersiveMineralScanning
     public static ImmersiveMineralScanning instance;
     @GameRegistry.ObjectHolder(ImmersiveMineralScanning.MODID+":rangedsampledrill")
     public static RangedSampleDrillBlock wideRangeSampleDrillBlock;
-    public static final CreativeTabs creativeTab = new ImmersiveMineralScanningTab();
+    public static final CreativeTabs CREATIVE_TAB = new ImmersiveMineralScanningTab();
     public static final SimpleNetworkWrapper PACKET_HANDLER = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
     public static boolean immersivePetroleumPresent = false;
     //true if it's a reservoir, false if it's a mineral
@@ -83,7 +83,7 @@ public class ImmersiveMineralScanning
         resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream().collect(Collectors.toMap(m -> m.name, m -> false));
         if (Loader.isModLoaded("immersivepetroleum")) {
 			immersivePetroleumPresent = true;
-			//can't use lambda or Java freaks out about ResourceType; need to stuff it in an Optional method instead
+			//can't use lambda or Java freaks out about ReservoirType; need to stuff it in an Optional method instead
 			PumpjackHandler.reservoirList.keySet().stream().forEach(this::addToResourceTypeMap);
         }
         
@@ -107,7 +107,7 @@ public class ImmersiveMineralScanning
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-    	event.getRegistry().register(new ItemBlock(wideRangeSampleDrillBlock).setRegistryName(wideRangeSampleDrillBlock.getRegistryName()).setCreativeTab(creativeTab));
+    	event.getRegistry().register(new ItemBlock(wideRangeSampleDrillBlock).setRegistryName(wideRangeSampleDrillBlock.getRegistryName()));
 //    	logger.info("registered item");
     }
     

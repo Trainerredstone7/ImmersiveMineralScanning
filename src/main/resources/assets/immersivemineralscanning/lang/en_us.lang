@@ -1,6 +1,9 @@
 #Creative tab
 itemGroup.immersivemineralscanning=Immersive Mineral Scanning
 
+#Blocks
+tile.immersivemineralscanning.rangedsampledrill.name=Ranged Core Sample Drill
+
 #Config
 immersivemineralscanning.config.scanradius=Scan Radius
 immersivemineralscanning.config.scanradius.tooltip=The radius (in chunks) in which the Ranged Core Sample Drill will search for a mineral deposit.

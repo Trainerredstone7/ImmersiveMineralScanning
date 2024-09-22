@@ -1,0 +1,25 @@
+{
+  "type": "forge:ore_shaped",
+  "result": {
+    "item": "immersivemineralscanning:rangedsampledrill"
+  },
+  "pattern": [
+    "SFS",
+    "SFS",
+    "BFB"
+  ],
+  "key": {
+    "F": {
+      "type": "forge:ore_dict",
+      "ore": "fenceSteel"
+    },
+    "S": {
+      "type": "forge:ore_dict",
+      "ore": "scaffoldingSteel"
+    },
+    "B": {
+      "item": "immersiveengineering:metal_decoration0",
+      "data": 5
+    }
+  }
+}

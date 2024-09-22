@@ -36,7 +36,6 @@ import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
  * Tile for the sample drill.
  * @author TrainerRedstone7
  * 
- * TODO: Add gui on sneak-click that allows for mineral/reservoir selection
  * Using a scrollable menu would probably work (does not need to be dropdown - just scroll and select)
  */
 
@@ -225,7 +224,6 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 				return true;
 			} 
 		}
-		//TODO: maybe make it so right clicking on the machine while it's functioning will cancel operation? Or maybe not, or maybe do it through the gui
 		return false;
 	}
 	

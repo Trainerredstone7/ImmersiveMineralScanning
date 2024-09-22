@@ -51,7 +51,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 		Stream<String> mineralNamesStream = ExcavatorHandler.mineralList.keySet().stream()
 				.filter(p -> p.validDimension(tile.getWorld().provider.getDimension()))
 				.map(m -> m.name);
-		//TODO uncomment and fix
 		if (ImmersiveMineralScanning.immersivePetroleumPresent) {
 			mineralNamesStream = Stream.concat(mineralNamesStream, PumpjackHandler.reservoirList.keySet().stream()
 					.filter(p -> p.validDimension(tile.getWorld().provider.getDimension()))
@@ -66,7 +65,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
 		guiLeft = (width-X_SIZE)/2;
 		guiTop = (height-Y_SIZE)/2;
@@ -98,6 +96,5 @@ public class RangedSampleDrillGui extends GuiScreen {
 		String displayedText = "Current target:\n" + currentTarget;
 		fontRenderer.drawString("Current target:", (width - fontRenderer.getStringWidth("Current target:"))/2, guiTop + LIST_HEIGHT + 10, 0xFFFFFFFF);
 		fontRenderer.drawString(currentTarget, (width - fontRenderer.getStringWidth(currentTarget))/2, guiTop + LIST_HEIGHT + 10 + fontRenderer.FONT_HEIGHT, 0xFFFFFFFF);
-//TODO: add something to draw the currentTarget string
 	}
 }

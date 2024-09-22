@@ -44,7 +44,7 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 	
 	//Whether the drill is looking for a reservoir vs. a mineral
 	public boolean searchingForReservoir = false;
-	public String searchTarget;
+	public String searchTarget = "";
 	//This should always be a ReservoirType, but cannot define it as such since we're not sure Immersive Petroleum is loaded
 //	public Object reservoirSearchTarget;
 	public int chunkProgress = 0;
@@ -54,13 +54,13 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 	//Unit is 1/16 of a rotation
 	public byte drillRotation = 0;
 	
-	public RangedSampleDrillTile(World world) {
-		searchTarget = ExcavatorHandler.mineralList.keySet().stream()
-				.filter(p -> p.validDimension(world.provider.getDimension()))
-				.map(m -> m.name)
-				.sorted(String.CASE_INSENSITIVE_ORDER)
-				.findFirst().orElseGet(() -> "");
-	}
+//	public RangedSampleDrillTile(World world) {
+//		searchTarget = ExcavatorHandler.mineralList.keySet().stream()
+//				.filter(p -> p.validDimension(world.provider.getDimension()))
+//				.map(m -> m.name)
+//				.sorted(String.CASE_INSENSITIVE_ORDER)
+//				.findFirst().orElseGet(() -> "");
+//	}
 	
 	@Override
 	public void update()
@@ -93,6 +93,7 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 					ImmersiveMineralScanning.logger.info("progress: " + chunkProgress + "/" + maxChunks);
 					boolean foundTarget = false;
 					DimensionChunkCoords targetLocation = drillChunk;
+					ImmersiveMineralScanning.logger.info("before: " + System.currentTimeMillis());
 					for (int i = 0; i < ConfigGeneral.scanrate && chunkProgress < maxChunks && !foundTarget; i++) {
 						int[] offset = getOffsetFromIndex(chunkProgress);
 						DimensionChunkCoords chunkToSearch = drillChunk.withOffset(offset[0], offset[1]);
@@ -116,6 +117,8 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 						ImmersiveMineralScanning.logger.info(chunkToSearch.toString() + ": " + foundTarget);
 						chunkProgress++;
 					}
+					ImmersiveMineralScanning.logger.info("after: " + System.currentTimeMillis());
+					ImmersiveMineralScanning.logger.info("progress: " + chunkProgress);
 					if (foundTarget) {
 						MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, targetLocation.x, targetLocation.z);
 						this.sample = createCoreSample(world, targetLocation.x, targetLocation.z, info);
@@ -182,7 +185,13 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 				return ((RangedSampleDrillTile)te).interact(side, player, hand, heldItem, hitX, hitY, hitZ);
 		}
 		if (drillExtension == 0) {
-			if (!this.sample.isEmpty()) {
+			if (player.isSneaking()) {
+				if (!active) {
+					ImmersiveMineralScanning.proxy.openRangedSampleDrillGui(getGuiMaster());
+					return true;
+				}
+			}
+			else if (!this.sample.isEmpty()) {
 				if (!world.isRemote) {
 					player.entityDropItem(this.sample.copy(), .5f);					
 				}
@@ -191,7 +200,8 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 				markDirty();
 				this.markContainingBlockForUpdate(null);
 				return true;
-			} else if (chunkProgress >= (2 * ConfigGeneral.chunkRadius - 1)
+			}
+			else if (chunkProgress >= (2 * ConfigGeneral.chunkRadius - 1)
 					* (2 * ConfigGeneral.chunkRadius - 1)) {
 				//tell player that the resource wasn't found
 				if (!world.isRemote) {
@@ -199,7 +209,14 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 				}
 				chunkProgress = 0;
 				return true;
-			} else if (!this.active) {
+			}
+			else if (searchTarget == "") {
+				if (!world.isRemote) {
+					player.sendMessage(new TextComponentTranslation("immersivemineralscanning.messages.nomineralselected"));
+				}
+				return true;
+			}
+			else if (!this.active) {
 				if (energyStorage.getEnergyStored() >= IEConfig.Machines.coredrill_consumption) {
 					this.active = true;
 					markDirty();
@@ -420,10 +437,10 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 	}
 
 	@Override
-	public TileEntity getGuiMaster() {
+	public RangedSampleDrillTile getGuiMaster() {
 		if (dummy != 0) {
 			TileEntity tile = world.getTileEntity(getPos().add(0, -dummy, 0));
-			return (tile instanceof RangedSampleDrillTile)?tile:null;
+			return (tile instanceof RangedSampleDrillTile)?(RangedSampleDrillTile) tile:null;
 		}
 		else return this;
 	}

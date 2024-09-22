@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
 import blusunrize.immersiveengineering.client.gui.elements.GuiReactiveList;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
+import flaxbeard.immersivepetroleum.client.render.TileAutoLubricatorRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
@@ -78,6 +79,7 @@ public class RangedSampleDrillGui extends GuiScreen {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button.id == 0 && mineralNames[((GuiReactiveList) button).selectedOption] != currentTarget) {
 			currentTarget = mineralNames[((GuiReactiveList) button).selectedOption];
+			tile.searchTarget = currentTarget;
 			ImmersiveMineralScanning.PACKET_HANDLER.sendToServer(new SearchTargetUpdatePacket(
 					tile.getPos(), tile.getWorld().provider.getDimension(), currentTarget));
 		}
@@ -93,6 +95,9 @@ public class RangedSampleDrillGui extends GuiScreen {
 	{
 		this.drawDefaultBackground();
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		//TODO: add something to draw the currentTarget string
+		String displayedText = "Current target:\n" + currentTarget;
+		fontRenderer.drawString("Current target:", (width - fontRenderer.getStringWidth("Current target:"))/2, guiTop + LIST_HEIGHT + 10, 0xFFFFFFFF);
+		fontRenderer.drawString(currentTarget, (width - fontRenderer.getStringWidth(currentTarget))/2, guiTop + LIST_HEIGHT + 10 + fontRenderer.FONT_HEIGHT, 0xFFFFFFFF);
+//TODO: add something to draw the currentTarget string
 	}
 }

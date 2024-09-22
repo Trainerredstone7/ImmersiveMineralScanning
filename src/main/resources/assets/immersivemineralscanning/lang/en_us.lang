@@ -7,3 +7,4 @@ immersivemineralscanning.config.scanradius.tooltip=The radius (in chunks) in whi
 immersivemineralscanning.config.scanrate=Scan Rate
 immersivemineralscanning.config.scanrate.tooltip=The number of chunks the Ranged Core Sample Drill will check per tick. Very large numbers could cause lag.
 immersivemineralscanning.messages.nomineralfound=The specified mineral or reservoir was not found within the scan range!
+immersivemineralscanning.messages.nomineralselected=Select a mineral or reservoir to search for first!

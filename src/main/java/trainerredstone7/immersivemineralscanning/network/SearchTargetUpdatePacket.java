@@ -44,7 +44,7 @@ public class SearchTargetUpdatePacket implements IMessage {
 			ImmersiveMineralScanning.instance.logger.info("received packet");
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
 				TileEntity tile = DimensionManager.getWorld(message.dim).getTileEntity(message.pos);
-				if (tile instanceof RangedSampleDrillTile) {
+				if (tile instanceof RangedSampleDrillTile && !((RangedSampleDrillTile) tile).active) {
 					((RangedSampleDrillTile) tile).searchTarget = message.searchTarget;
 					((RangedSampleDrillTile) tile).searchingForReservoir = ImmersiveMineralScanning.instance.resourceTypeMap.getOrDefault(message.searchTarget, false);
 					ImmersiveMineralScanning.instance.logger.info("set search target to " + message.searchTarget);

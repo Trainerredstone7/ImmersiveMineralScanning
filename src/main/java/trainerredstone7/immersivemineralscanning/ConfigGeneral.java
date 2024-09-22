@@ -25,7 +25,7 @@ public class ConfigGeneral {
 	
 	@RangeInt(min = 1, max = Integer.MAX_VALUE)
 	@LangKey(value = "immersivemineralscanning.config.scanrate")
-	public static int scanrate = 10;
+	public static int scanrate = 100;
 
 //	public static void readConfig(Configuration config) {
 //		ImmersiveMineralScanning.logger.info("reading config");

@@ -167,7 +167,7 @@ public class RangedSampleDrillBlock extends Block {
 	
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		return new RangedSampleDrillTile(world);
+		return new RangedSampleDrillTile();
 	}
 	
 	@Override
@@ -250,7 +250,7 @@ public class RangedSampleDrillBlock extends Block {
 		if(tile instanceof RangedSampleDrillTile)
 		{
 			if (player.isSneaking()) {
-				ImmersiveMineralScanning.proxy.openRangedSampleDrillGui((RangedSampleDrillTile) tile);
+				ImmersiveMineralScanning.proxy.openRangedSampleDrillGui((RangedSampleDrillTile) ((RangedSampleDrillTile) tile).getGuiMaster());
 				return true;
 			}
 			else {

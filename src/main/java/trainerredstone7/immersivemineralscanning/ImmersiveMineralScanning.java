@@ -47,7 +47,7 @@ public class ImmersiveMineralScanning
 {
     public static final String MODID = "immersivemineralscanning";
     public static final String NAME = "Immersive Mineral Scanning";
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.1";
 
     public static Logger logger;
     @SidedProxy(clientSide = "trainerredstone7.immersivemineralscanning.proxy.ClientProxy", serverSide = "trainerredstone7.immersivemineralscanning.proxy.ServerProxy")
@@ -57,7 +57,7 @@ public class ImmersiveMineralScanning
     @GameRegistry.ObjectHolder(ImmersiveMineralScanning.MODID+":rangedsampledrill")
     public static RangedSampleDrillBlock wideRangeSampleDrillBlock;
     public static final CreativeTabs CREATIVE_TAB = new ImmersiveMineralScanningTab();
-    public static final SimpleNetworkWrapper PACKET_HANDLER = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
+    public static final SimpleNetworkWrapper PACKET_HANDLER = NetworkRegistry.INSTANCE.newSimpleChannel("imscanning"); //mod id is too long
     public static boolean immersivePetroleumPresent = false;
     //true if it's a reservoir, false if it's a mineral
     public Map<String, Boolean> resourceTypeMap;
@@ -79,7 +79,6 @@ public class ImmersiveMineralScanning
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        proxy.postInit(event);
         resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream().collect(Collectors.toMap(m -> m.name, m -> false));
         if (Loader.isModLoaded("immersivepetroleum")) {
 			immersivePetroleumPresent = true;
@@ -87,9 +86,7 @@ public class ImmersiveMineralScanning
 			//can't use lambda or Java freaks out about ReservoirType; need to stuff it in an Optional method instead
 			PumpjackHandler.reservoirList.keySet().forEach(this::addToResourceTypeMap);
         }
-        ManualPages.Crafting manualPage0 = new ManualPages.Crafting(ManualHelper.getManual(), "rangedsampledrill0", new ItemStack(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock)));
-        ManualPages.Text manualPage1 = new ManualPages.Text(ManualHelper.getManual(), "rangedsampledrill1");
-        ManualHelper.addEntry("rangedsampledrill", ManualHelper.CAT_GENERAL, manualPage0, manualPage1);
+        proxy.postInit(event);
     }
     
     @Optional.Method(modid = "immersivepetroleum")

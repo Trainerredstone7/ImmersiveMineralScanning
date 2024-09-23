@@ -1,31 +1,21 @@
 package trainerredstone7.immersivemineralscanning.gui;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
 import blusunrize.immersiveengineering.client.gui.elements.GuiReactiveList;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
-import flaxbeard.immersivepetroleum.client.render.TileAutoLubricatorRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
 import trainerredstone7.immersivemineralscanning.blocks.tileentities.RangedSampleDrillTile;
 import trainerredstone7.immersivemineralscanning.network.SearchTargetUpdatePacket;
-import net.minecraftforge.fml.common.Optional;
 
 /**
  * 
  * @author trainerredstone7
  *
- * Will not need an IGuiHandler as no container is needed
- * This info might help
- * https://jabelarminecraft.blogspot.com/p/minecraft-forge-1721710-gui-and-input.html
- * 
- * Will need to send packet to server whenever a setting changes in the GUI
- * This can be done in actionPerformed
- * (Should a packet be sent from server to client if someone else changes a setting? totally unnecessary but might be nice)
  */
 public class RangedSampleDrillGui extends GuiScreen {
 	
@@ -42,8 +32,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 	
 	
 	
-	//Consider sending just the important info rather than the entire tile
-	//Make sure to save position and dim as well for later packet sending
 	public RangedSampleDrillGui(RangedSampleDrillTile tile) {
 		this.tile = tile;
 		currentTarget = tile.searchTarget;
@@ -61,8 +49,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 				.toArray(String[]::new);
 	}
 
-	
-	
 	@Override
 	public void initGui() {
 		super.initGui();
@@ -70,8 +56,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 		guiTop = (height-Y_SIZE)/2;
 		buttonList.add(new GuiReactiveList(this, 0, guiLeft, guiTop, LIST_WIDTH, LIST_HEIGHT, mineralNames));
 	}
-
-
 
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
@@ -83,8 +67,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 		}
 	}
 
-
-
 	/**
 	 * Draws the screen and all the components in it.
 	 */
@@ -93,7 +75,6 @@ public class RangedSampleDrillGui extends GuiScreen {
 	{
 		this.drawDefaultBackground();
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		String displayedText = "Current target:\n" + currentTarget;
 		fontRenderer.drawString("Current target:", (width - fontRenderer.getStringWidth("Current target:"))/2, guiTop + LIST_HEIGHT + 10, 0xFFFFFFFF);
 		fontRenderer.drawString(currentTarget, (width - fontRenderer.getStringWidth(currentTarget))/2, guiTop + LIST_HEIGHT + 10 + fontRenderer.FONT_HEIGHT, 0xFFFFFFFF);
 	}

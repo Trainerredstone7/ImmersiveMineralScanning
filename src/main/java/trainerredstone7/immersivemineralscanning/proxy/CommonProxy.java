@@ -9,7 +9,6 @@ import trainerredstone7.immersivemineralscanning.blocks.tileentities.RangedSampl
 /**
  * 
  * @author trainerredstone7
- * 
  *
  */
 @Mod.EventBusSubscriber

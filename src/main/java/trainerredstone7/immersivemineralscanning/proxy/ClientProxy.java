@@ -1,8 +1,6 @@
 package trainerredstone7.immersivemineralscanning.proxy;
 
 import blusunrize.immersiveengineering.client.models.obj.IEOBJLoader;
-import blusunrize.immersiveengineering.client.render.TileRenderSampleDrill;
-import blusunrize.immersiveengineering.common.blocks.metal.TileEntitySampleDrill;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -33,9 +31,7 @@ public class ClientProxy extends CommonProxy {
     	ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock), 0, new ModelResourceLocation(ImmersiveMineralScanning.wideRangeSampleDrillBlock.getRegistryName(), "inventory"));
 		ClientRegistry.bindTileEntitySpecialRenderer(RangedSampleDrillTile.class, new RangedSampleDrillRender());
     }
-    /*
-     * https://www.mcjty.eu/docs/1.12/rendering/block-obj helpful tutorial
-     */
+
     public void preInit(FMLPreInitializationEvent event){
 		OBJLoader.INSTANCE.addDomain(ImmersiveMineralScanning.MODID);
 		IEOBJLoader.instance.addDomain(ImmersiveMineralScanning.MODID);

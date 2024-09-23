@@ -47,7 +47,7 @@ public class ImmersiveMineralScanning
 {
     public static final String MODID = "immersivemineralscanning";
     public static final String NAME = "Immersive Mineral Scanning";
-    public static final String VERSION = "0.1";
+    public static final String VERSION = "1.0";
 
     public static Logger logger;
     @SidedProxy(clientSide = "trainerredstone7.immersivemineralscanning.proxy.ClientProxy", serverSide = "trainerredstone7.immersivemineralscanning.proxy.ServerProxy")
@@ -67,10 +67,6 @@ public class ImmersiveMineralScanning
     {
         logger = event.getModLog();
         proxy.preInit(event);
-//        File directory = event.getModConfigurationDirectory();
-//        config = new Configuration(new File(directory.getPath(), "immersivemineralscanning.cfg"));
-//        ConfigHelper.readConfig(config);
-        logger.info("preinit");
     }
 
     @EventHandler
@@ -87,14 +83,13 @@ public class ImmersiveMineralScanning
         resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream().collect(Collectors.toMap(m -> m.name, m -> false));
         if (Loader.isModLoaded("immersivepetroleum")) {
 			immersivePetroleumPresent = true;
+			logger.info("Immersive Petroleum present, enabling compatibility");
 			//can't use lambda or Java freaks out about ReservoirType; need to stuff it in an Optional method instead
-			PumpjackHandler.reservoirList.keySet().stream().forEach(this::addToResourceTypeMap);
+			PumpjackHandler.reservoirList.keySet().forEach(this::addToResourceTypeMap);
         }
         ManualPages.Crafting manualPage0 = new ManualPages.Crafting(ManualHelper.getManual(), "rangedsampledrill0", new ItemStack(Item.getItemFromBlock(ImmersiveMineralScanning.wideRangeSampleDrillBlock)));
         ManualPages.Text manualPage1 = new ManualPages.Text(ManualHelper.getManual(), "rangedsampledrill1");
-        ManualHelper.addEntry("Ranged Core Sample Drill", ManualHelper.CAT_GENERAL, manualPage0, manualPage1);
-//TODO add manual page
-//        ManualHelper.addEntry(String name, String category, IManualPage... pages);
+        ManualHelper.addEntry("rangedsampledrill", ManualHelper.CAT_GENERAL, manualPage0, manualPage1);
     }
     
     @Optional.Method(modid = "immersivepetroleum")
@@ -105,7 +100,6 @@ public class ImmersiveMineralScanning
     @SuppressWarnings("deprecation")
 	@SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
-//    	logger.info("about to register block");
     	event.getRegistry().register(new RangedSampleDrillBlock());
     	GameRegistry.registerTileEntity(RangedSampleDrillTile.class, MODID + "_rangedsampledrill");
     }
@@ -113,7 +107,6 @@ public class ImmersiveMineralScanning
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
     	event.getRegistry().register(new ItemBlock(wideRangeSampleDrillBlock).setRegistryName(wideRangeSampleDrillBlock.getRegistryName()));
-//    	logger.info("registered item");
     }
     
     @SubscribeEvent
@@ -122,18 +115,4 @@ public class ImmersiveMineralScanning
     		ConfigManager.sync(MODID, Config.Type.INSTANCE);
     	}
     }
-    
-//	/**
-//	 * Needs optional annotation so generic reference to ReservoirType doesn't blow up startup
-//	 */
-//  @Optional.Method(modid = "immersivepetroleum")
-//	private void putReservoirTypesInResourceTypeMap() {
-//		PumpjackHandler.reservoirList.keySet().stream().forEach(this::addToResourceTypeMap);
-//	}
-
-
-//    @Optional.Method(modid = "immersivepetroleum")
-//    public void putReservoirTypesInResourceTypeMap() {
-//    	
-//    }
 }

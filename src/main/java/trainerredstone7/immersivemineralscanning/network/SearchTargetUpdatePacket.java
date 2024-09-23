@@ -16,9 +16,7 @@ public class SearchTargetUpdatePacket implements IMessage {
 	private int dim;
 	private String searchTarget;
 	
-	public SearchTargetUpdatePacket() {
-		
-	}
+	public SearchTargetUpdatePacket() {}
 	
 	public SearchTargetUpdatePacket(BlockPos pos, int dim, String searchTarget) {
 		this.pos = pos;
@@ -41,13 +39,11 @@ public class SearchTargetUpdatePacket implements IMessage {
 
 		@Override
 		public IMessage onMessage(SearchTargetUpdatePacket message, MessageContext ctx) {
-			ImmersiveMineralScanning.instance.logger.info("received packet");
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
 				TileEntity tile = DimensionManager.getWorld(message.dim).getTileEntity(message.pos);
 				if (tile instanceof RangedSampleDrillTile && !((RangedSampleDrillTile) tile).active) {
 					((RangedSampleDrillTile) tile).searchTarget = message.searchTarget;
 					((RangedSampleDrillTile) tile).searchingForReservoir = ImmersiveMineralScanning.instance.resourceTypeMap.getOrDefault(message.searchTarget, false);
-					ImmersiveMineralScanning.instance.logger.info("set search target to " + message.searchTarget);
 					
 				}
 			});

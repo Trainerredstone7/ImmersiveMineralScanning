@@ -2,10 +2,6 @@ package trainerredstone7.immersivemineralscanning.blocks.tileentities;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
-
 import blusunrize.immersiveengineering.api.ApiUtils;
 import blusunrize.immersiveengineering.api.DimensionChunkCoords;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
@@ -28,7 +24,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -40,30 +35,19 @@ import trainerredstone7.immersivemineralscanning.ImmersiveMineralScanning;
  * Tile for the sample drill.
  * @author TrainerRedstone7
  * 
- * Using a scrollable menu would probably work (does not need to be dropdown - just scroll and select)
  */
 
 public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGuiTile {
 	
-	//Whether the drill is looking for a reservoir vs. a mineral
+	//Whether the drill is looking for a reservoir vs. a mineral vein
 	public boolean searchingForReservoir = false;
 	public String searchTarget = "";
-	//This should always be a ReservoirType, but cannot define it as such since we're not sure Immersive Petroleum is loaded
-//	public Object reservoirSearchTarget;
 	public int chunkProgress = 0;
 	//0 is fully retracted, 100 is fully extended
 	public int drillExtension = 0;
 	public boolean isDrillExtending = false;
-	//Unit is 1/16 of a rotation
+	//Unit is 1/16 of a rotation. Overflow is OK
 	public byte drillRotation = 0;
-	
-//	public RangedSampleDrillTile(World world) {
-//		searchTarget = ExcavatorHandler.mineralList.keySet().stream()
-//				.filter(p -> p.validDimension(world.provider.getDimension()))
-//				.map(m -> m.name)
-//				.sorted(String.CASE_INSENSITIVE_ORDER)
-//				.findFirst().orElseGet(() -> "");
-//	}
 	
 	@Override
 	public void update()
@@ -72,31 +56,21 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		if(dummy!=0||world.isAirBlock(getPos().add(0, -1, 0)))
 			return;
 		updateDrillBitPosition();
-//		ImmersiveMineralScanning.logger.info("is drill active? " + active);
-//		ImmersiveMineralScanning.logger.info("is drill extending? " + isDrillExtending);
-//		ImmersiveMineralScanning.logger.info("drill extension: " + drillExtension);
-//		ImmersiveMineralScanning.logger.info("drill rotation: " + drillRotation);
 		if (world.isRemote||!sample.isEmpty()) return;
 
 		boolean powered = world.isBlockIndirectlyGettingPowered(getPos()) > 0;
 		final boolean prevActive = active;
 		if(!active&&powered&&sample.isEmpty())
 			active = true;
-//		if (!world.isRemote) {
-//			ImmersiveMineralScanning.logger.info("active = " + active);
-//			ImmersiveMineralScanning.logger.info("sample empty? " + sample.isEmpty());
-//			ImmersiveMineralScanning.logger.info("energy: " + energyStorage.getEnergyStored());
-//		}
 
 		if(active)
 			if(energyStorage.extractEnergy(IEConfig.Machines.coredrill_consumption, false)==IEConfig.Machines.coredrill_consumption) {	
 				if (!world.isRemote) {
 					DimensionChunkCoords drillChunk = new DimensionChunkCoords(world.provider.getDimension(), getPos().getX() >> 4, getPos().getZ() >> 4);
 					int maxChunks = (2 * ConfigGeneral.chunkRadius - 1) * (2 * ConfigGeneral.chunkRadius - 1);
-					ImmersiveMineralScanning.logger.info("progress: " + chunkProgress + "/" + maxChunks);
+//					ImmersiveMineralScanning.logger.info("progress: " + chunkProgress + "/" + maxChunks);
 					boolean foundTarget = false;
 					DimensionChunkCoords targetLocation = drillChunk;
-					ImmersiveMineralScanning.logger.info("before: " + System.currentTimeMillis());
 					for (int i = 0; i < ConfigGeneral.scanrate && chunkProgress < maxChunks && !foundTarget; i++) {
 						int[] offset = getOffsetFromIndex(chunkProgress);
 						DimensionChunkCoords chunkToSearch = drillChunk.withOffset(offset[0], offset[1]);
@@ -117,11 +91,8 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 							foundTarget = true;
 							targetLocation = chunkToSearch;
 						}
-						ImmersiveMineralScanning.logger.info(chunkToSearch.toString() + ": " + foundTarget);
 						chunkProgress++;
 					}
-					ImmersiveMineralScanning.logger.info("after: " + System.currentTimeMillis());
-					ImmersiveMineralScanning.logger.info("progress: " + chunkProgress);
 					if (foundTarget) {
 						MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, targetLocation.x, targetLocation.z);
 						this.sample = createCoreSample(world, targetLocation.x, targetLocation.z, info);
@@ -141,16 +112,8 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 					}
 					if (chunkProgress >= maxChunks) {
 						active = false;
-//						chunkProgress = 0;
 					}
 				}
-//				if(chunkProgress >= IEConfig.Machines.coredrill_time)
-//				{
-//					int cx = getPos().getX() >> 4;
-//					int cz = getPos().getZ() >> 4;
-//					MineralWorldInfo info = ExcavatorHandler.getMineralWorldInfo(world, cx, cz);
-//					this.sample = createCoreSample(world, (getPos().getX() >> 4), (getPos().getZ() >> 4), info);
-//				}
 				this.markDirty();
 				this.markContainingBlockForUpdate(null);
 			}
@@ -161,9 +124,6 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private void updateDrillBitPosition() {
 		if(active) {
 			drillRotation++;
@@ -210,7 +170,6 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 					player.entityDropItem(this.sample.copy(), .5f);					
 				}
 				this.sample = ItemStack.EMPTY;
-//				this.active = false;
 				markDirty();
 				this.markContainingBlockForUpdate(null);
 				return true;
@@ -225,16 +184,14 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 									new TextComponentTranslation("immersivemineralscanning.messages.reservoir")
 									:new TextComponentTranslation("immersivemineralscanning.messages.vein");
 					player.sendMessage(new TextComponentTranslation(("immersivemineralscanning.messages.nomineralfound"), resource, resourceType));
-//					ITextComponent messageComponent = ImmersiveMineralScanning.immersivePetroleumPresent?new TextComponentTranslation("immersivemineralscanning.messages.reservoirincluded"):new TextComponentString("");
-//					player.sendMessage(new TextComponentTranslation(("immersivemineralscanning.messages.nomineralfound"), messageComponent));
 				}
 				chunkProgress = 0;
 				return true;
 			}
 			else if (searchTarget == "") {
 				if (!world.isRemote) {
-					ITextComponent messageComponent = ImmersiveMineralScanning.immersivePetroleumPresent?new TextComponentTranslation("immersivemineralscanning.messages.reservoirincluded"):new TextComponentString("");
-					player.sendMessage(new TextComponentTranslation("immersivemineralscanning.messages.nomineralselected", messageComponent));
+					ITextComponent reservoirInclusion = ImmersiveMineralScanning.immersivePetroleumPresent?new TextComponentTranslation("immersivemineralscanning.messages.reservoirincluded"):new TextComponentString("");
+					player.sendMessage(new TextComponentTranslation("immersivemineralscanning.messages.nomineralselected", reservoirInclusion));
 				}
 				return true;
 			}
@@ -250,11 +207,8 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		return false;
 	}
 	
-	public void placeDummies(BlockPos pos, IBlockState state)
-	{
-		ImmersiveMineralScanning.logger.info(searchTarget);
-		for(int i = 1; i <= 2; i++)
-		{
+	public void placeDummies(BlockPos pos, IBlockState state) {
+		for(int i = 1; i <= 2; i++) {
 			world.setBlockState(pos.add(0, i, 0), state);
 			((TileEntitySampleDrill)world.getTileEntity(pos.add(0, i, 0))).dummy = i;
 		}
@@ -271,13 +225,7 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		nbt.setBoolean("isDrillExtending", isDrillExtending);
 		if (searchTarget != null) {
 			nbt.setString("searchTarget", searchTarget);
-//			NBTTagCompound mineralSearchTargetNBT = mineralSearchTarget.writeToNBT();
-//			nbt.setTag("mineralSearchTarget", mineralSearchTargetNBT);
 		}
-//		if (ImmersiveMineralScanning.immersivePetroleumPresent && reservoirSearchTarget instanceof ReservoirType) {
-//			NBTTagCompound reservoirSearchTargetNBT = ((ReservoirType) reservoirSearchTarget).writeToNBT();
-//			nbt.setTag("reservoirSearchTarget", reservoirSearchTargetNBT);
-//		}
 	}
 
 	@Override
@@ -290,12 +238,6 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		isDrillExtending = nbt.getBoolean("isDrillExtending");
 		drillRotation = nbt.getByte("drillRotation");
 		searchTarget = nbt.getString("searchTarget");
-//		if (nbt.hasKey("mineralSearchTarget", NBT.TAG_COMPOUND)) {
-//			searchTarget = MineralMix.readFromNBT(nbt.getCompoundTag("searchTarget")).name;
-//		}
-//		if (ImmersiveMineralScanning.immersivePetroleumPresent && nbt.hasKey("reservoirSearchTarget", NBT.TAG_COMPOUND)) {
-//			reservoirSearchTarget = ReservoirType.readFromNBT(nbt.getCompoundTag("reservoirSearchTarget"));
-//		}
 	}
 	
 	
@@ -357,7 +299,7 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		if (world.isRemote)
 			return null;
 		int dim = world.provider.getDimension();
-		//chunkX and chunkZ should be divided by depositSize, but it's always 1 (and it's private)
+		//chunkX and chunkZ are divided by depositSize in the original method, but it's always 1 (and it's private) so it shouldn't matter
 		OilWorldInfo worldInfo = PumpjackHandler.oilCache.get(chunkCoords);
 		if (worldInfo == null)
 		{
@@ -439,12 +381,6 @@ public class RangedSampleDrillTile extends TileEntitySampleDrill implements IGui
 		else {
 			return new int[] {k, k-(m-n-t)};
 		}
-//		//alternative method; probably slower
-//		int m = (int) Math.floor(Math.sqrt(n));
-//		int x = (int) Math.pow(-1, m+1)*((n-m*(m+1))*(((int) Math.floor(2*Math.sqrt(n))+1)%2)+(int) Math.ceil(m/2.0));
-//		int y = (int) Math.pow(-1, m)*((n-m*(m+1))*(((int) Math.floor(2*Math.sqrt(n)))%2)-(int) Math.ceil(m/2.0));
-//		return new int[] {x,y};
-		
 	}
 
 	@Override

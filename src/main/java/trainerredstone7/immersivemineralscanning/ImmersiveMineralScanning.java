@@ -79,7 +79,12 @@ public class ImmersiveMineralScanning
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream().collect(Collectors.toMap(m -> m.name, m -> false));
+    	resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream()
+    		    .collect(Collectors.toMap(
+    		        m -> m.name,
+    		        m -> false,
+    		        (v1, v2) -> v1 // or v2 — they’re both 'false'
+    		    ));
         if (Loader.isModLoaded("immersivepetroleum")) {
 			immersivePetroleumPresent = true;
 			logger.info("Immersive Petroleum present, enabling compatibility");

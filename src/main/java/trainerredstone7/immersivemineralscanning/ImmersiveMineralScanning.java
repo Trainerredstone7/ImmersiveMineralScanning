@@ -92,7 +92,7 @@ public class ImmersiveMineralScanning
     
     @Optional.Method(modid = "immersivepetroleum")
     private void addToResourceTypeMap(ReservoirType r) {
-    	if (resourceTypeMap.putIfAbsent(r.name, false) != null) {
+    	if (resourceTypeMap.putIfAbsent(r.name, true) != null) {
 			logger.warn("Tried to add duplicate entry with name \"" + r.name + "\" to mineral list! This may cause problems when scanning for this reservoir");
 		}
     }

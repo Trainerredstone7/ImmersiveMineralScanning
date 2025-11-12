@@ -43,8 +43,7 @@ public class SearchTargetUpdatePacket implements IMessage {
 				TileEntity tile = DimensionManager.getWorld(message.dim).getTileEntity(message.pos);
 				if (tile instanceof RangedSampleDrillTile && !((RangedSampleDrillTile) tile).active) {
 					((RangedSampleDrillTile) tile).searchTarget = message.searchTarget;
-					((RangedSampleDrillTile) tile).searchingForReservoir = ImmersiveMineralScanning.instance.resourceTypeMap.getOrDefault(message.searchTarget, false);
-					
+					((RangedSampleDrillTile) tile).searchingForReservoir = ImmersiveMineralScanning.instance.resourceTypeMap.getOrDefault(message.searchTarget, false);	
 				}
 			});
 			return null;

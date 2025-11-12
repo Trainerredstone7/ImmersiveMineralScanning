@@ -1,20 +1,16 @@
 package trainerredstone7.immersivemineralscanning;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.Logger;
 
-import blusunrize.immersiveengineering.api.ManualHelper;
 import blusunrize.immersiveengineering.api.tool.ExcavatorHandler;
-import blusunrize.lib.manual.ManualPages;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler;
 import flaxbeard.immersivepetroleum.api.crafting.PumpjackHandler.ReservoirType;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
@@ -60,7 +56,7 @@ public class ImmersiveMineralScanning
     public static final SimpleNetworkWrapper PACKET_HANDLER = NetworkRegistry.INSTANCE.newSimpleChannel("imscanning"); //mod id is too long
     public static boolean immersivePetroleumPresent = false;
     //true if it's a reservoir, false if it's a mineral
-    public Map<String, Boolean> resourceTypeMap;
+    public Map<String, Boolean> resourceTypeMap = new HashMap<>();
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -79,7 +75,12 @@ public class ImmersiveMineralScanning
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        resourceTypeMap = ExcavatorHandler.mineralList.keySet().stream().collect(Collectors.toMap(m -> m.name, m -> false));
+    	//Credit to Michalovsky112 for catching the duplicate key error
+    	ExcavatorHandler.mineralList.keySet().forEach(k -> {
+    		if (resourceTypeMap.putIfAbsent(k.name, false) != null) {
+    			logger.warn("Tried to add duplicate entry with name \"" + k.name + "\" to mineral list! This may cause problems when scanning for this mineral");
+    		}
+    	});
         if (Loader.isModLoaded("immersivepetroleum")) {
 			immersivePetroleumPresent = true;
 			logger.info("Immersive Petroleum present, enabling compatibility");
@@ -91,7 +92,9 @@ public class ImmersiveMineralScanning
     
     @Optional.Method(modid = "immersivepetroleum")
     private void addToResourceTypeMap(ReservoirType r) {
-    	resourceTypeMap.putIfAbsent(r.name, true);
+    	if (resourceTypeMap.putIfAbsent(r.name, false) != null) {
+			logger.warn("Tried to add duplicate entry with name \"" + r.name + "\" to mineral list! This may cause problems when scanning for this reservoir");
+		}
     }
     
     @SuppressWarnings("deprecation")
